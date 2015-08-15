@@ -1,0 +1,11 @@
+<flow name="summary-core">
+
+	<title>Summary</title>
+	<desc>Summarize information: drivers, ...</desc>
+
+	<in name="projects_in" />
+
+	<module name="drivers">
+		<run>drivers.py</run>
+	</module>
+</flow>

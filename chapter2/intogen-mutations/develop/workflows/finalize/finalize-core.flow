@@ -1,0 +1,21 @@
+<flow name="finalize-core">
+    <title>Finalize</title>
+
+	<in name="projects_in" />
+
+	<module name="projects">
+		<title>Finalize project</title>
+		<desc>Upload project results into storage and purge uploaded files if required</desc>
+
+		<in name="projects_in" link="projects_in" />
+
+		<run>projects.py</run>
+	</module>
+
+	<module name="all" depends="projects">
+        <title>Finalize all</title>
+        <desc>Upload combination results into storage and purge uploaded files if required</desc>
+
+        <run>all.py</run>
+    </module>
+</flow>

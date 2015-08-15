@@ -1,0 +1,34 @@
+set +e
+
+if [ $# -ne 4 ]; then
+	echo "Usage: transfic-perf-scores <db> <predictors> <pos> <neg>"
+	exit -1
+fi
+
+db_path=$1
+
+predictors=$2
+
+pos_path=$3
+pos_basename=$(basename $pos_path)
+pos_name="${pos_basename%.*}"
+
+neg_path=$4
+neg_basename=$(basename $neg_path)
+neg_name="${neg_basename%.*}"
+
+set_name=${pos_name}__${neg_name}
+set_file=scores/${set_name}.set
+set_scores=scores/${set_name}
+set_scores_filt=scores-filt/${set_name}
+
+echo "*** $pos_name + $neg_name --> $set_name"
+
+condel-training-sets $pos_path $neg_path -o $set_file
+
+echo "*** Fetching scores for $set_name ..."
+
+fannsdb-fetch -p $predictors -a prot_gene,swissprot_id,swissprot_acc $db_path $set_file $set_scores
+transfic-filter-transcripts ../trs_len.tsv $set_scores $set_scores_filt
+
+#rm $set_file

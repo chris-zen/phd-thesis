@@ -1,0 +1,141 @@
+{% from "quality.jinja2" import quality_control %}
+
+{% macro progress(case) -%}
+{% if case.state %}
+<div class="pull-left"><span id="state" class="label state-color-{{ case.state }}" data-state="{{ case.state }}">{{ case.state }}</span></div>
+<div class="case-progress progress pull-left">
+	{% for prg in case.progress %}
+	<div class="progress-bar progress-bar-{{ prg.state }}" style="width: {{ prg.percent }}%;" title="{{ prg.tooltip }}"></div>
+	{% endfor %}
+</div>
+{% endif %}
+{%- endmacro %}
+
+{% macro time_details(case) %}
+{% set details = "Created on " + case.created|datetimefmt %}
+{% if case.state %}
+	{% if case.started %}
+		{% set details = details + ", started on " + case.started|datetimefmt(case.created) %}
+	{% endif %}
+	{% if case.finished and case.state in ["finished", "failed", "aborted"] %}
+		{% set details = details + ", " + case.state + " on " + case.finished|datetimefmt(case.started) %}
+	{% endif %}
+	{% if case.elapsed %}
+		{% set details = details + ", elapsed " + case.elapsed|elapsed_time %}
+	{% endif %}
+{% endif %}
+<small class="case-details">{{ details }}</small>
+{%- endmacro %}
+
+{% macro actions(current_user, case, details_enabled, browser_enabled) -%}
+{% set valid_state = "state" not in case or case.state is none or case.state == "finished" %}
+{% set dn_disabled = "" if not case.removed and case.results_available and valid_state else "disabled" %}
+{% set bw_disabled = "" if not case.removed and case.website_available and valid_state else "disabled" %}
+{% set rm_disabled = "" if not case.removed else "disabled" %}
+<div class="btn-group btn-group-sm">
+	{% if details_enabled %}
+	<a class="case-first-btn btn" href="{{ url_for('cases.details', case_id=case.id) }}">
+		<i class="glyphicon glyphicon-info-sign"></i> Details</a>
+	{% else %}
+		{%  set dn_disabled = dn_disabled + " case-first-btn" %}
+	{% endif %}
+	<a class="btn {{ dn_disabled }}" href="{{ url_for('cases.download', case_id=case.id) }}">
+		<i class="glyphicon glyphicon-arrow-down"></i> Download</a>
+	{% if browser_enabled %}
+	<a class="btn {{ bw_disabled }}" href="/web/{{ current_user.email }}/{{ case.name }}" target="_top">
+		<i class="glyphicon glyphicon-eye-open"></i> Browse</a>
+	{% endif %}
+</div>
+<div class="btn-group btn-group-sm pull-right">
+	<a class="btn remove-btn {{ rm_disabled }}" href="#confirm-remove" data-toggle="modal" data-case="{{ case.name }}" data-url="{{ url_for('cases.remove', case_id=case.id) }}">
+		<i class="glyphicon glyphicon-remove"></i> Remove</a>
+</div>
+{%- endmacro %}
+
+{% macro list_case(current_user, case, details_enabled, browser_enabled) -%}
+<div class="clearfix"></div>
+<div class="list-group-item {{ active }}">
+	<div id="progress" class="pull-right">
+		{{ progress(case) }}
+	</div>
+	<h4 class="list-group-item-heading">
+		<a href="{{ url_for('cases.details', case_id=case.id) }}" title="Click here for details">
+			<i class="analysis-icon analysis-icon-{{ case.analysis_type }} case-analysis-icon"></i>
+			<strong> {{ case.name }}</strong>
+		</a>
+	</h4>
+	<div class="list-group-item-text">
+		{{ time_details(case) }}
+	</div>
+	{{ actions(current_user, case, details_enabled, browser_enabled) }}
+</div>
+{% endmacro %}
+
+{% macro cases_list(current_user, cases, details_enabled, browser_enabled, highlight=0) -%}
+{% if cases %}
+<div class="list-group">
+	{% for case in cases -%}
+	{% set active = "_active" if highlight is not none and highlight == case.id else "" %}
+	{{ list_case(current_user, case, details_enabled=details_enabled, browser_enabled=browser_enabled) }}
+	{%- endfor %}
+</div>
+{% else %}
+<div class="list-group">
+	<div class="list-group-item"><strong>There are no results available. You can run an example or start a new analysis.</strong></div>
+</div>
+{% endif %}
+{%- endmacro %}
+
+{% macro page_header(back_url=None, back_title="All") -%}
+<div class="header-buttons">
+	{% if back_url is not none %}
+	<a class="btn" href="{{ back_url }}"><i class="glyphicon glyphicon-arrow-left"></i> {{ back_title }}</a>
+	{% endif %}
+	<div class="btn-group-sm pull-right">
+		<a id="refresh-btn" class="btn btn-default" href="#"><span class="glyphicon glyphicon-refresh"></span> Refresh</a>
+	</div>
+</div>
+{%- endmacro %}
+
+{% macro case_details(case) -%}
+{{ errors(case) }}
+{{ quality_control(case) }}
+{%- endmacro %}
+
+{% macro errors(case) -%}
+{% if case.exceptions %}
+<div class="panel panel-danger">
+	<div class="panel-heading"><h3 class="panel-title">Errors</h3></div>
+	<div class="panel-body">
+		{% for task in case.exceptions %}
+		<h4 class="list-group-item-heading error-task-cname">At {{ task.cname }}:</h4>
+		<table class="table table-hover">
+		{% for wi in task.workitems %}
+		<tr>
+			<td class="error-wi-index">[{{ wi.index }}]</td>
+			<td>{{ wi.exception }} ({{ wi.exitcode}})</td>
+		</tr>
+		{% endfor %}
+		</table>
+		{% endfor %}
+	</div>
+</div>
+{% endif %}
+{%- endmacro %}
+
+{% macro quality_control_panel(case) -%}
+<div class="panel panel-default">
+	<div class="panel-heading"><h3 class="panel-title">Quality control</h3></div>
+	<div class="panel-body">
+		{% if case.quality %}
+		{{ quality_control(case.quality) }}
+		{% else %}
+		<div class="alert alert-warning">
+			There is no quality control data available yet.
+			Press<a id="refresh-btn" class="btn" href="#">refresh</a>when the analysis is done,
+			or run the analysis again to update the quality control data.
+		</div>
+		{% endif %}
+	</div>
+</div>
+{%- endmacro %}

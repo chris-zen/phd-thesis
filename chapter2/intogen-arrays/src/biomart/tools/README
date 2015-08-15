@@ -1,0 +1,3 @@
+Example:
+
+python reload_pubmed.py -D biomart.db.name=biomart_v03_16 -D "biomart.db.host=portege-r700" -D biomart.db.user=bgadmin -D biomart.db.passwd=*** -D biomart.db.port=3308

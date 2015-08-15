@@ -1,0 +1,11 @@
+#!/bin/bash
+
+ENSEMBL_64=sep2011.archive.ensembl.org
+ENSEMBL_LAST=www.ensembl.org
+
+HOST_ENSEMBL=$ENSEMBL_64
+HOST_UNIPROT=$ENSEMBL_64
+
+ensembl-get-ann $HOST_ENSEMBL ensp_enst.map ensembl_peptide_id ensembl_transcript_id
+
+ensembl-get-ann $HOST_UNIPROT ensp_uniprot.map ensembl_peptide_id uniprot_swissprot

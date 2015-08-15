@@ -1,0 +1,34 @@
+#!/bin/bash
+
+if [ $# -lt 4 ]; then
+	echo "Usage: ensembl-get-ann <host> <file> <attr-src> <attr-dst>"
+	exit -1
+fi
+
+host=$1
+file=$2
+attr_src=$3
+attr_dst=$4
+
+echo
+echo "From $host: $attr_src * $attr_dst --> $file ..."
+echo
+
+date "+# %D %T" >$file
+echo "## host=$host" >>$file
+echo "## attr_src=$attr_src" >>$file
+echo "## attr_dst=$attr_dst" >>$file
+
+(curl -o - --data-urlencode query@-  http://$host/biomart/martservice |
+ gawk '$1 != "" && $2 != ""' |
+ grep -vE "^LRG.*" |
+ sort -u >>$file) <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Query>
+<Query  virtualSchemaName = "default" formatter = "TSV" header = "0" uniqueRows = "1" count = "" datasetConfigVersion = "0.6" >	
+	<Dataset name = "hsapiens_gene_ensembl" interface = "default" >
+		<Attribute name = "$attr_src" />
+		<Attribute name = "$attr_dst" />
+	</Dataset>
+</Query>
+EOF

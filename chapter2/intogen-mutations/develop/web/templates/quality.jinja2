@@ -1,0 +1,76 @@
+{% macro quality_scripts(javascript_url) -%}
+<!--[if lt IE 9]>
+  <script type="text/javascript" src="{{ javascript_url }}/excanvas.compiled.js"></script>
+<![endif]-->
+<link rel="stylesheet" type="text/css" href="{{ javascript_url }}/jqplot/jquery.jqplot.min.css" />
+<script type="text/javascript" src="{{ javascript_url }}/jqplot/jquery.jqplot.min.js"></script>
+<script type="text/javascript" src="{{ javascript_url }}/jqplot/plugins/jqplot.barRenderer.min.js"></script>
+<script type="text/javascript" src="{{ javascript_url }}/jqplot/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+<script type="text/javascript" src="{{ javascript_url }}/jqplot/plugins/jqplot.pointLabels.min.js"></script>
+<script type="text/javascript" src="{{ javascript_url }}/jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
+<script type="text/javascript" src="{{ javascript_url }}/jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+<script type="text/javascript" src="{{ javascript_url }}/jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
+<script type="text/javascript" src="{{ javascript_url }}/jqplot/plugins/jqplot.canvasOverlay.min.js"></script>
+<script type="text/javascript" src="{{ javascript_url }}/jqplot/plugins/jqplot.pieRenderer.min.js"></script>
+<script type="text/javascript" src="{{ javascript_url }}/jqplot/plugins/jqplot.highlighter.min.js"></script>
+<script type="text/javascript" src="{{ javascript_url }}/jqplot/plugins/jqplot.cursor.min.js"></script>
+<script type="text/javascript" src="{{ javascript_url }}/quality-plots.js"></script>
+{%- endmacro %}
+
+{% macro td_lost(value) -%}
+{% if value is defined %}
+<td{{ " class='danger'" if value > 0 else "" }}>{{ value }}</td>
+{% else %}
+<td></td>
+{% endif %}
+{%- endmacro %}
+
+{% macro quality_variants(data) -%}
+<div class="clearfix"></div>
+<h4 class="qc-title"><span class="glyphicon glyphicon-th"></span> Mutations</h4>
+
+{% for source, counts in data %}
+<div class="clearfix"></div>
+<h5 class="qc-source-title"><span class="glyphicon glyphicon-file"></span> {{ source }}</h5>
+
+	<div id="variants-counts-{{ loop.index0 }}"></div>
+<div id="variants-counts-table"></div>
+{% endfor %}
+{%- endmacro %}
+
+{% macro quality_oncodrivefm(data) -%}
+<div class="clearfix"></div>
+
+<h4 class="qc-title"><span class="glyphicon glyphicon-th"></span> OncodriveFM</h4>
+
+<div id="ofm-genes"></div>
+<div id="ofm-samples"></div>
+<div id="ofm-counts-table"></div>
+
+<div class="clearfix"></div>
+
+<div id="ofm-genes-sample-count"></div>
+<div id="ofm-sig-count"></div>
+{%- endmacro %}
+
+{% macro quality_oncodriveclust(data) -%}
+<div class="clearfix"></div>
+<h4 class="qc-title"><span class="glyphicon glyphicon-th"></span> OncodriveCLUST</h4>
+
+<div id="oclust-genes"></div>
+<div id="oclust-samples"></div>
+<div id="oclust-counts-table"></div>
+
+<div class="clearfix"></div>
+
+<div id="oclust-genes-sample-count"></div>
+<div id="oclust-sig-count"></div>
+{%- endmacro %}
+
+{% macro quality_control(quality) -%}
+{% if quality %}
+{% if quality.variants %}{{ quality_variants(quality.variants) }}{% endif %}
+{% if quality.oncodrivefm %}{{ quality_oncodrivefm(quality.oncodrivefm) }}{% endif %}
+{% if quality.oncodriveclust %}{{ quality_oncodriveclust(quality.oncodriveclust) }}{% endif %}
+{% endif %}
+{%- endmacro %}

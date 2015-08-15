@@ -1,0 +1,128 @@
+<flow name="cnv" serializer="json">
+	<title>Genomic workflow</title>
+	<desc>Workflow analysing genomic assays</desc>
+
+	<!-- 0 init -->
+	<module name="init" enabled="1">
+		<title>Initialize</title>
+		<desc>Prepare entity collections</desc>
+
+		<exec launcher="python">
+			<script>cnv_init.py</script>
+		</exec>
+	</module>
+
+	<!-- 1 study ids -->
+	<module name="study_ids" enabled="1">
+		<title>Study IDs retrieval</title>
+		<desc>Retrieve study IDs for the available source.study</desc>
+
+		<out name="study_ids">
+			<desc>Study IDs</desc>
+		</out>
+
+		<exec launcher="python">
+			<script>../study_ids.py</script>
+		</exec>
+	</module>
+
+	<!-- 2 source assay classif -->
+	<module name="assay_classif" maxpar="1" depends="init" enabled="1">
+		<title>Assays classification</title>
+		<desc>Validate and classify assays containing CNV events</desc>
+
+		<in name="study_ids" link="study_ids.study_ids" />
+
+		<out name="evt_ids" />
+		<out name="evt_tumour_unit_ids" />
+
+		<exec launcher="python">
+			<script>cnv_assay_classif.py</script>
+		</exec>
+	</module>
+
+	<!-- 3 events map and join -->
+	<module name="map_and_join" enabled="1">
+		<title>Tumour unit data files join</title>
+		<desc>Join data files of the assays in a cnv.evt_tumour_unit into a whole matrix</desc>
+
+		<in name="evt_tumour_unit_ids" link="assay_classif.evt_tumour_unit_ids" />
+
+		<out name="joined_evt_tumour_unit_ids" />
+
+		<exec launcher="python">
+			<script>cnv_map_and_join.py</script>
+		</exec>
+	</module>
+
+	<!-- 4 oncodrive -->
+	<module name="oncodrive_calc" enabled="1">
+		<in name="evt_tumour_unit_ids" link="map_and_join.joined_evt_tumour_unit_ids" wsize="6" />
+
+		<out name="oncodrive_results_ids" />
+
+		<exec launcher="python">
+			<script>cnv_oncodrive_calc.py</script>
+		</exec>
+	</module>
+
+	<!-- 5 enrichment -->
+	<module name="enrichment" enabled="1">
+		<in name="oncodrive_ids" link="oncodrive_calc.oncodrive_results_ids" wsize="6">
+			<desc>Calculated oncodrive results per gene ids</desc>
+		</in>
+
+		<out name="enrichment_ids">
+			<desc>Enrichment results ids</desc>
+		</out>
+
+		<exec launcher="python">
+			<script>cnv_enrichment.py</script>
+		</exec>
+	</module>
+
+	<!-- 6 combination of genes -->
+	<module name="comb_gene_classif" maxpar="1" enabled="1">
+		<in name="oncodrive_ids" link="oncodrive_calc.oncodrive_results_ids">
+			<desc>Calculated oncodrive results per gene ids</desc>
+		</in>
+
+		<out name="combinations">
+			<desc>Prepared mrna.combination to be calculated</desc>
+		</out>
+
+		<exec launcher="python">
+			<script>cnv_comb_gene_classif.py</script>
+		</exec>
+	</module>
+
+	<!-- 7 combination of modules -->
+	<module name="comb_module_classif" maxpar="1" enabled="1">
+		<in name="enrichment_ids" link="enrichment.enrichment_ids">
+			<desc>Calculated enrichment results ids</desc>
+		</in>
+
+		<out name="combinations">
+			<desc>Prepared mrna.combination to be calculated</desc>
+		</out>
+
+		<exec launcher="python">
+			<script>cnv_comb_module_classif.py</script>
+		</exec>
+	</module>
+
+	<!-- 8 combination calc -->
+	<module name="comb_calc" enabled="1">
+		<in name="combinations" link="comb_gene_classif.combinations, comb_module_classif.combinations" wsize="16">
+			<desc>Combinations to calculate</desc>
+		</in>
+
+		<out name="combination_ids">
+			<desc>Calculated combination results ids</desc>
+		</out>
+
+		<exec launcher="python">
+			<script>cnv_comb_calc.py</script>
+		</exec>
+	</module>
+</flow>

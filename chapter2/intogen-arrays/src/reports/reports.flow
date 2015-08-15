@@ -1,0 +1,28 @@
+<flow name="reports" serializer="json">
+	<title>Reports generation</title>
+
+	<module name="mrna_preproc_extract" enabled="1">
+		<out name="mrna_log2r_tunit" />
+		<out name="mrna_normal_pool" />
+
+		<exec launcher="python">
+			<script>mrna_preproc_extract.py</script>
+		</exec>
+	</module>
+
+	<module name="mrna_preproc_normal_pool" enabled="1">
+		<in name="id" link="mrna_preproc_extract.mrna_normal_pool" />
+
+		<exec launcher="python">
+			<script>mrna_preproc_normal_pool.py</script>
+		</exec>
+	</module>
+
+	<module name="mrna_preproc_log2r_tunit" enabled="1">
+		<in name="id" link="mrna_preproc_extract.mrna_log2r_tunit" />
+
+		<exec launcher="python">
+			<script>mrna_preproc_log2r_tunit.py</script>
+		</exec>
+	</module>
+</flow>

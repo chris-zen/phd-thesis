@@ -1,0 +1,8 @@
+doc/build
+*.pyc
+nbproject
+doc/*.pdf
+build
+dist
+wok.egg-info
+.idea

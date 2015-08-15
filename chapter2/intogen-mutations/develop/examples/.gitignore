@@ -1,0 +1,5 @@
+*
+!.gitignore
+!index.json
+!snp_breast_colorectal.tab
+!snp_pediatric_brain.tab

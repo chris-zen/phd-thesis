@@ -1,0 +1,119 @@
+{% extends "layout.html" %}
+
+{% from "quality.jinja2" import quality_scripts %}
+{% from "cases.jinja2" import page_header, cases_list, errors, quality_control_panel %}
+
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cases.css') }}"/>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/quality.css') }}"/>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/cases.js') }}"></script>
+
+{% autoescape false %}
+{{ quality_scripts(url_for('static', filename='js')) }}
+{% endautoescape %}
+
+<script type="text/javascript">
+	var quality_data = {{ case.quality|tojson|safe }};
+</script>
+
+<script type="text/javascript">
+	var errors_updated = {{ (true if case.exceptions else false) | tojson | safe }};
+	var qc_variants_updated = {{ (true if case.quality.variants else false) | tojson | safe }};
+	var qc_genes_updated = {{ (true if case.quality.genes else false) | tojson | safe }};
+	init({
+		updatePage: function(source) {
+			ajaxUpdate({
+					selector: "#cases-list",
+					success: function() {
+						var state = $("#state").data("state");
+						if (!errors_updated && state == "failed") {
+							ajaxUpdate({selector: "#case-errors"});
+							errors_updated = true;
+						}
+					}
+			});
+
+			if (source == "button") {
+				ajaxUpdate({
+					selector: "#case-quality",
+					success: function() {
+						$.get("{{ url_for('.json_quality', case_id=case.id) }}", function(data) {
+								updateQualityPlots(data);
+						});
+					}
+				});
+			}
+		},
+		afterRemove: function() {
+			window.location = "{{ url_for('cases.index') }}"
+		}
+	});
+</script>
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		updateQualityPlots(quality_data);
+	});
+</script>
+{% endblock %}
+
+{% block body %}
+
+{% autoescape false %}
+{{ page_header(url_for('cases.index', highlight=case.id)) }}
+{% endautoescape %}
+
+<div id="cases-list" class="clearfix" data-url="{{ url_for('.ajax_header', case_id=case.id) }}">
+	{% autoescape false %}
+	{{ cases_list(current_user, [case], details_enabled=False, browser_enabled=browser_enabled) }}
+	{% endautoescape %}
+</div>
+
+<div id="case-errors" data-url="{{ url_for('.ajax_errors', case_id=case.id) }}">
+{% autoescape false %}
+{{ errors(case) }}
+{% endautoescape %}
+</div>
+
+<div class="panel panel-default">
+	<div class="panel-heading"><h3 class="panel-title">Analysis options</h3></div>
+	<div class="panel-body form-horizontal">
+		{% for param in case.params %}
+		<div class="form-group">
+			<label class="col-md-3 control-label">{{ param.title }}</label>
+			<div class="col-md-9 param-value">{{ param.value }}</div>
+		</div>
+		{% endfor %}
+	</div>
+</div>
+
+<div id="case-quality" data-url="{{ url_for('.ajax_quality', case_id=case.id) }}">
+{% autoescape false %}
+{{ quality_control_panel(case) }}
+{% endautoescape %}
+</div>
+
+{# --- Dialogs --- #}
+
+<div id="confirm-remove" class="modal fade" role="dialog" aria-labelledby="modal-label" aria-hidden="true" tabindex="-1">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h3>Remove case</h3>
+			</div>
+			<div class="modal-body">
+				Are you sure to remove the case <span id="confirm-remove-case-name"></span> ?
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>
+				<a id="confirm-remove-btn" class="btn btn-danger" data-dismiss="modal" href="#">Remove</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

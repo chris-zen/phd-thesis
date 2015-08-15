@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block stylesheets %}
+<style type="text/css">
+	body {
+		/*padding-top: 40px;
+		padding-bottom: 40px;*/
+		background-color: #f5f5f5;
+	}
+
+	.persona {
+		width: 100%;
+		text-align: center;
+		margin: auto auto;
+		text-align: center;
+	}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#persona-btn").button().click(function (event) {
+			event.preventDefault();
+			navigator.id.request();
+		});
+	});
+</script>
+{% endblock %}
+
+{% block body %}
+
+<div class="row">
+	<div class="col-md-12">
+		<form class="form-sign" action="{{ url_for('persona.signin') }}" method="POST">
+			<div class="persona">
+				<button id="persona-btn" class="btn persona-button"><span>Sign in with Persona</span></button>
+			</div>
+		</form>
+	</div>
+</div>
+
+{% endblock %}

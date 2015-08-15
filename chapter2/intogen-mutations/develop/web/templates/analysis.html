@@ -1,0 +1,257 @@
+{% extends "layout.html" %}
+
+{% set oncodrivefm_url = "http://bg.upf.edu/oncodrivefm" %}
+{% set oncodriveclust_url = "http://bg.upf.edu/oncodriveclust" %}
+
+{% block stylesheets %}
+<style type="text/css">
+	.modal-dialog {
+		width: 1000px;
+	}
+
+	.modal-iframe {
+		background-color: transparent;
+		width: 100%;
+		height: 400px;
+		border: none;
+	}
+
+	#analysis-options-heading, #advanced-options-heading {
+		cursor: pointer;
+	}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+	function parse_path(str) {
+		str = new String(str).replace(/\\/g, "/");
+		str = str.replace("C:", "");
+
+		var pos = str.lastIndexOf('/');
+		var path = str.substring(0, pos);
+		var name = str.substring(pos + 1);
+		var ext = "";
+		if (name.lastIndexOf(".") != -1) {
+			pos = name.lastIndexOf(".");
+			ext = name.substring(pos, name.length);
+			name = name.substring(0, pos);
+		}
+		return {"path" : path, "name" : name, "ext" : ext};
+	}
+
+	function nice_size(size) {
+		if (size > 1024 * 1024)
+	    	return (Math.round(size * 100 / (1024 * 1024)) / 100).toString() + ' MB';
+	    else if (size > 1024)
+	    	return (Math.round(size * 100 / 1024) / 100).toString() + ' KB';
+	  	else
+	  		return size + ' B';
+	}
+
+	var analysis_options_visible = true;
+	var advanced_options_visible = false;
+
+	function update_options_panels() {
+		if (analysis_options_visible) {
+			$("#analysis-options-body").show();
+		}
+		else {
+			$("#analysis-options-body").hide();
+		}
+		if (advanced_options_visible) {
+			$("#advanced-options-body").show();
+		}
+		else {
+			$("#advanced-options-body").hide();
+		}
+	}
+
+	$(document).ready(function() {
+		$('input[id=mutations_file]').change(function() {
+			$('#file_name').val($(this).val());
+			var p = parse_path($(this).val());
+
+			$('#file_name').val(p.name + p.ext);
+			if (! $('#project_name').val()) {
+				$('#project_name').val(p.name.replace(/[^a-zA-Z0-9-]/g, "_")); }
+		});
+
+		$("#analysis-options-heading").click(function (event) {
+			event.preventDefault();
+			analysis_options_visible = true;
+			advanced_options_visible = false;
+			update_options_panels();
+		});
+
+		$("#advanced-options-heading").click(function (event) {
+			event.preventDefault();
+			advanced_options_visible = true;
+			analysis_options_visible = false;
+			update_options_panels();
+		});
+
+		$('#genes-filter-file').change(function() {
+			var file = $('#genes-filter-file').prop('files')[0];
+			if (file) {
+				$('#genes-filter-load').hide();
+				$('#genes-filter-icon').show();
+				$('#genes-filter-name').show();
+				$('#genes-filter-remove').show();
+
+				$('#genes-filter-name').text(" " + file.name + " (" + nice_size(file.size) + ")");
+			}
+			else {
+				$('#genes-filter-load').show();
+				$('#genes-filter-icon').hide();
+				$('#genes-filter-name').hide();
+				$('#genes-filter-remove').hide();
+			}
+		});
+
+		$("#genes-filter-remove").button().click(function(event) {
+			event.preventDefault();
+			var control = $('#genes-filter-file');
+			control.replaceWith(control = control.clone(true));
+			$('#genes-filter-load').show();
+			$('#genes-filter-icon').hide();
+			$('#genes-filter-name').hide();
+			$('#genes-filter-remove').hide();
+		});
+	});
+</script>
+{% endblock %}
+
+{% block body %}    
+<form class="form-horizontal" role="form" action="{{ url_for('analysis.run', type=type) }}" enctype="multipart/form-data" method="POST">
+	{% if type == "cohort" %}
+		{% set analysis_title = "Cohort analysis" %}
+		<input type="hidden" name="variants_only" value="0">
+	{% elif type == "single-tumor" %}
+		{% set analysis_title = "Single tumor analysis" %}
+		<input type="hidden" name="variants_only" value="1">
+	{% endif %}
+
+	<div class="panel panel-default">
+		<div id="analysis-options-heading" class="panel-heading"><strong>{{ analysis_title }}</strong></div>
+		<div id="analysis-options-body" class="panel-body">
+			<div class="form-group">
+				<label class="col-md-2 control-label" for="file_name">Mutations file</label>
+				<div class="col-md-6">
+					<input id="file_name" type="text" disabled="disabled" class="form-control">
+					<span class="help-block">File with mutations per sample according to <a href="#help-format" role="button" data-toggle="modal">this format</a></span>
+					<input id="mutations_file" type="file" required='required' name="mutations_file" size="40" style="display:none;">
+				</div>
+				<div class="col-md-2">
+					<a class="btn btn-default" onclick="$('input[id=mutations_file]').click();">Load ...</a>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-md-2 control-label" for="project_name">Analysis name</label>
+				<div class="col-md-10">
+					<input type="text" name="project_name" id="project_name" required='required' class="form-control" value="{{ form.project_name|default('') }}">
+					<span class="help-block">A unique name that identifies this analysis</span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-md-2 control-label" for="assembly-hg18">Genome assembly</label>
+				<div class="col-md-10">
+					<div class="radio"><label><input type="radio" name="assembly" id="assembly-hg18" value="hg18">hg18 (NCBI36)</label></div>
+					<div class="radio"><label><input type="radio" name="assembly" id="assembly-hg19" value="hg19" checked="checked">hg19 (GRCh37)</label></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{% if type == "cohort" %}
+	<div class="panel panel-default">
+		<div id="advanced-options-heading" class="panel-heading"><strong>Advanced options</strong></div>
+		<div id="advanced-options-body" class="panel-body" style="display: none">
+			<div class="form-group">
+				<label class="col-md-2 control-label" for="ofm-genes-threshold">OncodriveFM genes threshold</label>
+				<div class="col-md-10">
+					<input type="text" pattern="^[1-9]\d*%?$" id="ofm-genes-threshold" name="ofm_genes_threshold" value="{{ form.ofm_genes_threshold|default('') }}" class="form-control">
+					<span class="help-block">Minimum number of mutated samples a gene must have to be analysed by <a href="{{ oncodrivefm_url }}">OncodriveFM</a></span>
+					<span class="help-block">It can be a number representing the minimum number of samples, or a percentage of the total number of samples when it ends with a '%'</span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-md-2 control-label" for="ofm-pathways-threshold">OncodriveFM pathways threshold</label>
+				<div class="col-md-10">
+					<input type="text" pattern="^[1-9]\d*%?$" id="ofm-pathways-threshold" name="ofm_pathways_threshold" value="{{ form.ofm_pathways_threshold|default('') }}" class="form-control">
+					<span class="help-block">Minimum number of mutated samples a pathway must have to be analysed by <a href="{{ oncodrivefm_url }}">OncodriveFM</a></span>
+					<span class="help-block">It can be a number representing the minimum number of samples, or a percentage of the total number of samples when it ends with a '%'</span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-md-2 control-label" for="oclust-genes-threshold">OncodriveCLUST genes threshold</label>
+				<div class="col-md-10">
+					<input type="number" min="1" id="oclust-genes-threshold" name="oclust_genes_threshold" value="{{ form.oclust_genes_threshold|default('') }}" class="form-control">
+					<span class="help-block">Minimum number of mutated samples a gene must have to be analysed by <a href="{{ oncodriveclust_url }}">OncodriveCLUST</a></span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-md-2 control-label" for="genes-filter-enabled">OncodriveFM and OncodriveCLUST genes filter</label>
+				<div class="col-md-10">
+					<div class="checkbox">
+						<label><input type="checkbox" id="genes-filter-enabled" name="genes_filter_enabled" checked value="1">Enabled&nbsp;&nbsp;</label>
+						<a id="genes-filter-load" href="#" onclick="$('#genes-filter-file').click();">Load custom filter ...</a>
+						<i id="genes-filter-icon" class="icon-file" style="display: none"></i>
+						<span id="genes-filter-name" style="display: none"></span><span>   </span>
+						<a id="genes-filter-remove" href="#" style="display: none">Remove</a>
+					</div>
+					<span class="help-block">The file format is explained <a href="#help-filter-format" role="button" data-toggle="modal">in the documentation</a></span>
+					<span class="help-block">The default filter excludes genes not expressed across tumors from
+						The Cancer Genome Atlas (TCGA) pan-cancer projects (find more information
+						<a href="https://www.synapse.org/#!Synapse:syn1734155" target="_blank">here</a>)</span>
+				</div>
+				<input id="genes-filter-file" type="file" name="genes_filter_file" size="40" style="display:none">
+			</div>
+		</div>
+	</div>
+	{% endif %}
+
+	<button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-play"></i> Start analysis</button>
+</form>
+
+<!-- Modal dialogs -->
+
+<div id="help-format" class="modal fade" role="dialog" aria-labelledby="modal-label" aria-hidden="true" tabindex="-1">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h3 id="modal-title">Format help</h3>
+			</div>
+			<div class="modal-body">
+				<iframe class="modal-iframe" seamless src="{{ url_for('help') }}/analysis_input.html#input-files"></iframe>
+			</div>
+			<div class="modal-footer">
+				<button class="btn" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="help-filter-format" class="modal fade" role="dialog" aria-labelledby="modal-label" aria-hidden="true" tabindex="-1">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h3>Genes filter format help</h3>
+			</div>
+			<div class="modal-body">
+				<iframe class="modal-iframe" seamless src="{{ url_for('help') }}/configuration.html#oncodrivefm-genes-filter"></iframe>
+			</div>
+			<div class="modal-footer">
+				<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

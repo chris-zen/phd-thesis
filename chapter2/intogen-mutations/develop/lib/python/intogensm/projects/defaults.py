@@ -1,0 +1,1 @@
+DEFAULT_ASSEMBLY = "hg19"

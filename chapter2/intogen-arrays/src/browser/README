@@ -1,0 +1,5 @@
+Example commands:
+
+python create_browser_db.py --browser-db browser_v03_18 --biomart-db biomart_v03_18 -h portege-r700 -u bgadmin -p *** -P 3308 .
+
+python create_browser_db.py --browser-db browser_v03_18 --biomart-db biomart_v03_18 -h portege-r700 -u bgadmin -p *** -P 3308 --start s04_results.sql .

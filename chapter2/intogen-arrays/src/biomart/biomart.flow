@@ -1,0 +1,108 @@
+<flow name="biomart" serializer="json">
+	<title>Biomart import</title>
+
+	<module name="ent_gene" enabled="0">
+		<exec launcher="python">
+			<script>ent_gene.py</script>
+		</exec>
+	</module>
+
+	<module name="drop_tables" enabled="1">
+		<exec launcher="python">
+			<script>drop_tables.py</script>
+		</exec>
+	</module>
+
+	<module name="extract_results" depends="drop_tables" enabled="1">
+		<out name="icdo" />
+		<out name="experiment" />
+
+		<out name="mrna_oncodrive_gene" />
+		<out name="mrna_enrichment" />
+		<out name="mrna_combination" />
+
+		<out name="cnv_oncodrive_gene" />
+		<out name="cnv_enrichment" />
+		<out name="cnv_combination" />
+
+		<exec launcher="python">
+			<script>extract_results.py</script>
+		</exec>
+	</module>
+
+	<module name="ent_icdo" maxpar="1" enabled="1">
+		<in name="icdo" link="extract_results.icdo" />
+
+		<exec launcher="python">
+			<script>ent_icdo.py</script>
+		</exec>
+	</module>
+
+	<module name="ent_exp" maxpar="1" enabled="1">
+		<in name="experiment" link="extract_results.experiment" />
+
+		<exec launcher="python">
+			<script>ent_exp.py</script>
+		</exec>
+	</module>
+
+	<module name="mrna_oncodrive" depends="ent_icdo, ent_exp" maxpar="1" enabled="1">
+		<in name="id" link="extract_results.mrna_oncodrive_gene" />
+
+		<exec launcher="python">
+			<script>mrna_oncodrive.py</script>
+		</exec>
+	</module>
+
+	<module name="mrna_enrichment" depends="ent_icdo, ent_exp" maxpar="1" enabled="1">
+		<in name="id" link="extract_results.mrna_enrichment" />
+
+		<exec launcher="python">
+			<script>mrna_enrichment.py</script>
+		</exec>
+	</module>
+
+	<module name="mrna_combination" depends="ent_icdo, ent_exp" maxpar="1" enabled="1">
+		<in name="id" link="extract_results.mrna_combination" />
+
+		<exec launcher="python">
+			<script>mrna_combination.py</script>
+		</exec>
+	</module>
+
+	<module name="cnv_oncodrive" depends="ent_icdo, ent_exp, mrna_oncodrive" maxpar="1" enabled="1">
+		<in name="id" link="extract_results.cnv_oncodrive_gene" />
+
+		<exec launcher="python">
+			<script>cnv_oncodrive.py</script>
+		</exec>
+	</module>
+
+	<module name="cnv_enrichment" depends="ent_icdo, ent_exp" maxpar="1" enabled="1">
+		<in name="id" link="extract_results.cnv_enrichment" />
+
+		<exec launcher="python">
+			<script>cnv_enrichment.py</script>
+		</exec>
+	</module>
+
+	<module name="cnv_combination" depends="ent_icdo, ent_exp" maxpar="1" enabled="1">
+		<in name="id" link="extract_results.cnv_combination" />
+
+		<exec launcher="python">
+			<script>cnv_combination.py</script>
+		</exec>
+	</module>
+
+	<module name="omod_exp" depends="cnv_oncodrive, mrna_oncodrive, cnv_enrichment, mrna_enrichment" enabled="1">
+		<exec launcher="python">
+			<script>omod_exp.py</script>
+		</exec>
+	</module>
+
+	<module name="omod_cmb" depends="cnv_combination, mrna_combination" enabled="1">
+		<exec launcher="python">
+			<script>omod_cmb.py</script>
+		</exec>
+	</module>
+</flow>

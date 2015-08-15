@@ -1,0 +1,34 @@
+set +e
+
+echo "*** Downloading datasets ..."
+
+wget -c http://bg.upf.edu/dn/transfic/datasets.tar.gz
+[ ! -d validation ] && mkdir -p validation
+tar -xvf datasets.tar.gz -C validation
+cd validation
+mkdir -p snvs scores scores-filt
+
+echo "*** Cleaning datasets ..."
+
+for f in cosmic1 cosmic2 cosmic5 cosmicO cosmicD cosmicCGC; do echo "  $f"; cp datasets/$f snvs/cosmic-${f#cosmic}.snvs; done
+echo "  cosmicnonCGC"; cut -s --complement -f1,3 datasets/cosmicnonCGC >snvs/cosmic-nonCGC.snvs
+echo "  polym"; cp datasets/polym snvs/poly.snvs
+
+for f in wg1 wg2 wgCGC wgnonCGC wgO wgD; do echo "  $f"; cat datasets/$f | awk 'BEGIN{FS="\t";OFS=FS}($2!="-"){print $2,$3,$4,$5}($2=="-"){print $1,$3,$4,$5}' >snvs/wg-${f#wg}.snvs; done
+
+#echo "*** Downloading swissprot map ..."
+
+#ensembl-get-ann "jul2012.archive.ensembl.org" ensp_swissprot_id.map ensembl_peptide_id uniprot_swissprot
+
+cat >datasets.txt <<EOF
+snvs/wg-2.snvs snvs/wg-1.snvs
+snvs/wg-CGC.snvs snvs/wg-nonCGC.snvs
+snvs/cosmic-2.snvs snvs/cosmic-1.snvs
+snvs/cosmic-2.snvs snvs/poly.snvs
+snvs/cosmic-5.snvs snvs/cosmic-1.snvs
+snvs/cosmic-5.snvs snvs/poly.snvs
+snvs/cosmic-D.snvs snvs/cosmic-O.snvs
+snvs/cosmic-D.snvs snvs/poly.snvs
+snvs/cosmic-CGC.snvs snvs/cosmic-nonCGC.snvs
+EOF
+

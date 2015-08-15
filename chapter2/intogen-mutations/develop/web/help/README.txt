@@ -1,0 +1,1 @@
+This folder will contain all the documentation html's and pdf generated automatically by the setup script.

@@ -1,0 +1,43 @@
+workers = 1
+worker_class = "gevent"
+graceful_timeout = 30
+
+_APP_MODULE = "web.app"
+
+import sys
+
+def _app():
+	try:
+		module = sys.modules[_APP_MODULE]
+	except KeyError:
+		print "Module not found: {}".format(_APP_MODULE)
+		print "Available modules: {}".format(", ".join(sorted(sys.modules.keys())))
+		exit(-1)
+	return module
+
+def on_starting(server):
+	pass #print "on_starting"
+
+def on_reload(server):
+	pass #print "on_reload"
+
+def when_ready(server):
+	pass #print "when_ready" # Initialize wok engine
+	#server.log.info('Starting up ...')
+	#_app().startup()
+
+def pre_fork(server, worker):
+	pass #print "pre_fork"
+
+def post_fork(server, worker):
+	pass # print "post_fork" # Inject wok engine
+
+def post_worker_init(worker):
+	pass # print "post_worker_init"
+
+def pre_exec(server):
+	pass # print "pre_exec"
+
+def worker_exit(server, worker):
+	worker.log.info('Cleaning up ...')
+	_app().cleanup()

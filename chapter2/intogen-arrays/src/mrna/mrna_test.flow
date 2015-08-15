@@ -1,0 +1,201 @@
+<flow name = "mrna">
+
+	<title>Transcriptomic testing pipeline</title>
+
+	<!-- 0 init -->
+	<module name="init" enabled="0">
+		<title>Initialize</title>
+		<desc>Prepare entity collections</desc>
+
+		<exec launcher="python">
+			<script>mrna_init.py</script>
+		</exec>
+	</module>
+
+	<!-- 1 study ids -->
+	<module name="study_ids" enabled="0">
+		<title>Study IDs retrieval</title>
+		<desc>Retrieve study IDs for the available source.study</desc>
+
+		<out name="study_ids">
+			<desc>Study IDs</desc>
+		</out>
+
+		<exec launcher="python">
+			<script>../study_ids.py</script>
+		</exec>
+	</module>
+
+	<!-- 2 source assay classif -->
+	<module name="assay_classif" maxpar="1" depends="init" enabled="0">
+		<title>Assays classification</title>
+		<desc>Validate and classify assays containing absolute readings</desc>
+
+		<in name="study_ids" link="study_ids.study_ids" />
+
+		<out name="absi_ids" />
+		<out name="log2r_source_ids" />
+		<out name="normal_pool_ids" />
+		<out name="absi_tumour_unit_ids" />
+
+		<exec launcher="python">
+			<script>mrna_assay_classif.py</script>
+		</exec>
+	</module>
+
+	<!-- 3 normal pool calc -->
+	<module name="normal_pool" enabled="0">
+		<in name="normal_pool_ids" link="assay_classif.normal_pool_ids" wsize="2" />
+
+		<exec launcher="python">
+			<script>mrna_normal_pool.py</script>
+		</exec>
+	</module>
+
+	<!-- 4 log2r calc -->
+	<module name="log2r_calc" depends="normal_pool" enabled="0">
+		<in name="absi_tumour_unit_ids" link="assay_classif.absi_tumour_unit_ids" wsize="2" />
+
+		<out name="log2r_ids" />
+
+		<exec launcher="python">
+			<script>mrna_log2r_calc.py</script>
+		</exec>
+	</module>
+
+	<!-- 5 log2r copy -->
+	<module name="log2r_copy" depends="log2r_calc" enabled="0">
+		<in name="log2r_source_ids" link="assay_classif.log2r_source_ids" wsize="5">
+			<desc>The ids of the log2r assays that are precalculated by the original authors</desc>
+		</in>
+
+		<out name="log2r_ids">
+			<desc>The ids of the source.log2r assays that has been copied</desc>
+		</out>
+
+		<exec launcher="python">
+			<script>mrna_log2r_copy.py</script>
+		</exec>
+	</module>
+
+	<!-- 6 log2r classif -->
+	<module name="log2r_classif" maxpar="1" enabled="1">
+		<in name="log2r_ids" link="log2r_calc.log2r_ids,log2r_copy.log2r_ids" />
+		<!-- <in name="log2r_ids" link="log2r_calc.log2r_ids" /> -->
+
+		<out name="log2r_tumour_unit_ids" />
+
+		<exec launcher="python">
+			<script>mrna_log2r_classif.py</script>
+		</exec>
+	</module>
+
+	<!-- 7 log2r join -->
+	<module name="log2r_join" enabled="1">
+		<in name="log2r_tumour_unit_ids" link="log2r_classif.log2r_tumour_unit_ids" wsize="1" />
+
+		<out name="joined_log2r_tumour_unit_ids" />
+
+		<exec launcher="python">
+			<script>mrna_log2r_join.py</script>
+		</exec>
+	</module>
+
+	<!-- 8 log2r cutoff -->
+	<module name="log2r_cutoff" enabled="1">
+		<in name="log2r_tumour_unit_ids" link="log2r_join.joined_log2r_tumour_unit_ids" wsize="2" />
+
+		<out name="processed_log2r_tumour_unit_ids" />
+		<out name="log2r_cutoff_ids" />
+
+		<exec launcher="python">
+			<script>mrna_log2r_slope_cutoff.py</script>
+		</exec>
+	</module>
+
+	<!-- 9 oncodriver -->
+	<module name="oncodrive_calc" enabled="1">
+		<in name="log2r_tumour_unit_ids" link="log2r_cutoff.processed_log2r_tumour_unit_ids" wsize="2" />
+
+		<out name="oncodrive_results_ids" />
+
+		<exec launcher="python">
+			<script>mrna_oncodrive_calc.py</script>
+		</exec>
+	</module>
+
+	<!-- 10 oncodriver mapping -->
+	<module name="oncodrive_map" enabled="1">
+		<in name="oncodrive_ids" link="oncodrive_calc.oncodrive_results_ids" wsize="4">
+			<desc>Calculated oncodrive results ids</desc>
+		</in>
+
+		<out name="mapped_oncodrive_ids">
+			<desc>Mapped oncodrive results ids</desc>
+		</out>
+
+		<exec launcher="python">
+			<script>mrna_oncodrive_map.py</script>
+		</exec>
+	</module>
+
+	<!-- 11 enrichment -->
+	<module name="enrichment" enabled="1">
+		<in name="oncodrive_ids" link="oncodrive_map.mapped_oncodrive_ids" wsize="2" >
+			<desc>Calculated oncodrive results per gene ids</desc>
+		</in>
+
+		<out name="enrichment_ids">
+			<desc>Enrichment results ids</desc>
+		</out>
+
+		<exec launcher="python">
+			<script>mrna_enrichment.py</script>
+		</exec>
+	</module>
+
+	<!-- 12 combination of genes -->
+	<module name="comb_gene_classif" maxpar="1" enabled="1">
+		<in name="oncodrive_ids" link="oncodrive_map.mapped_oncodrive_ids">
+			<desc>Calculated oncodrive results per gene ids</desc>
+		</in>
+
+		<out name="combinations">
+			<desc>Prepared mrna.combination to be calculated</desc>
+		</out>
+
+		<exec launcher="python">
+			<script>mrna_comb_gene_classif.py</script>
+		</exec>
+	</module>
+
+	<!-- 13 combination of modules -->
+	<module name="comb_module_classif" maxpar="1" enabled="1">
+		<in name="enrichment_ids" link="enrichment.enrichment_ids">
+			<desc>Calculated enrichment results ids</desc>
+		</in>
+
+		<out name="combinations">
+			<desc>Prepared mrna.combination to be calculated</desc>
+		</out>
+
+		<exec launcher="python">
+			<script>mrna_comb_module_classif.py</script>
+		</exec>
+	</module>
+
+	<!-- 14 combination calc -->
+	<module name="comb_calc" depends="comb_module_classif" enabled="1">
+		<in name="combinations" link="comb_gene_classif.combinations">
+			<desc>Combinations to calculate</desc>
+		</in>
+
+		<out name="combination_ids">
+			<desc>Calculated combination results ids</desc>
+		</out>
+
+		<exec launcher="python">
+			<script>mrna_comb_calc.py</script>
+		</exec>
+	</module>
+</flow>

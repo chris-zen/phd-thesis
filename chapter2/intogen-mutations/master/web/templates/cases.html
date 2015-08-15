@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% from "cases.jinja2" import page_header, cases_list %}
+
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/cases.css') }}"/>
+{% endblock %}
+
+{% block scripts %}
+{% if cases %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/cases.js') }}"></script>
+<script type="text/javascript">
+	init({ updatePage: function() { ajaxUpdate({selector: "#cases-list"}); }});
+</script>
+{% endif %}
+{% endblock %}
+
+{% block body %}
+
+{% autoescape false %}
+{{ page_header() }}
+{% endautoescape %}
+
+<div id="cases-list" class="clearfix" data-url="{{ url_for('.ajax_list') }}">
+	{% autoescape false %}
+	{{ cases_list(current_user, cases, True, browser_enabled, highlight) }}
+	{% endautoescape %}
+</div>
+
+{# --- Dialogs --- #}
+
+<div id="confirm-remove" class="modal fade" role="dialog" aria-labelledby="modal-label" aria-hidden="true" tabindex="-1">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h3>Remove case</h3>
+			</div>
+			<div class="modal-body">
+				Are you sure to remove the case <span id="confirm-remove-case-name"></span> ?
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>
+				<a id="confirm-remove-btn" class="btn btn-danger" data-dismiss="modal" href="#">Remove</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

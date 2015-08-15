@@ -1,0 +1,52 @@
+.header-buttons {
+	height: 3.4em;
+}
+
+.list-group-item {
+	padding-left: 30px;
+}
+
+.list-group-item:hover {
+	background-color: #f4f4f4;
+}
+
+.list-group-item-heading a {
+	text-decoration: none;
+	color: #333;
+}
+
+.state-label {
+	width: 8em; /* TODO: doesn't work, use a <ul> for the whole right status info */
+}
+
+.case-progress {
+	margin-left: 1em;
+	width: 10em;
+}
+
+.case-analysis-icon {
+	float: left;
+	margin-top: 3px;
+	margin-left: -20px;
+	vertical-align: middle;
+}
+
+.case-details {
+	color: grey;
+}
+
+.case-first-btn {
+	padding-left: 0 !important;
+}
+
+.param-value {
+	padding-top: 7px; /* same padding as bootstrap control-label*/
+}
+
+.error-task-cname {
+	padding-bottom: 10px;
+}
+
+.error-wi-index {
+	width: 4.2em;
+}

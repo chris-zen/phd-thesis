@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if [ $# -lt 2 ]; then
+	echo "Usage: condel-ann-add <db-path> <data-path>"
+	exit -1
+fi
+
+DB_PATH=$1
+DATA_PATH=$2
+
+fannsdb-ann-add --priority 10 $DB_PATH swissprot_id "Swissprot ID" protein $DATA_PATH/ann_prot_swissprot_id.tsv
+fannsdb-ann-add --priority 20 $DB_PATH swissprot_acc "Swissprot Accession" protein $DATA_PATH/ann_prot_swissprot_acc.tsv
+fannsdb-ann-add --priority 30 $DB_PATH refseq_prot "Refseq Protein" protein $DATA_PATH/ann_prot_refseq_prot.tsv
+fannsdb-ann-add --priority 40 $DB_PATH prot_gene "Protein gene ID" protein $DATA_PATH/ann_prot_gene.tsv
+fannsdb-ann-add --priority 50 $DB_PATH prot_transcript "Protein transcript ID" protein $DATA_PATH/ann_prot_transcript.tsv
+
+fannsdb-ann-add $DB_PATH gene "Ensembl Gene" transcript $DATA_PATH/ann_trans_gene.tsv
+fannsdb-ann-add $DB_PATH symbol "HGNC Symbol" transcript $DATA_PATH/ann_trans_sym.tsv
+fannsdb-ann-add $DB_PATH entrez "Entrez Gene" transcript $DATA_PATH/ann_trans_entrez.tsv
+fannsdb-ann-add $DB_PATH omim_gene "OMIM Gene" transcript $DATA_PATH/ann_trans_mim_gene_acc.tsv
+fannsdb-ann-add $DB_PATH omim_morbid "OMIM Morbid" transcript $DATA_PATH/ann_trans_mim_morbid_acc.tsv
+fannsdb-ann-add $DB_PATH omim_morbid_desc "OMIM Morbid Description" transcript $DATA_PATH/ann_trans_mim_morbid_desc.tsv

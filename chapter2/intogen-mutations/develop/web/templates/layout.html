@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+<head>
+	<title>IntOGen Mutations</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+	
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+	<link rel="stylesheet" type="text/css" href="{{ url_for('core.static', filename='css/bootstrap.min.css') }}"/>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('persona.static', filename='css/persona.css') }}"/>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/layout.css') }}"/>
+
+<style type="text/css">
+[class^="analysis-icon-"],
+[class*=" analysis-icon-"] {
+	background-image: url('{{ url_for("static", filename="img/analysis_icons.png") }}');
+}
+</style>
+
+	{% block stylesheets %}
+	{% endblock %}
+
+	<script type="text/javascript" src="{{ url_for('core.static', filename='js/jquery-1.8.3.min.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('core.static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="https://login.persona.org/include.js"></script>
+	<script type="text/javascript" src="{{ url_for('persona.static', filename='js/persona.js') }}"></script>
+
+{% if config.GOOGLE_ANALYTICS_ACCOUNT %}
+<script type="text/javascript">
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', '{{ config.GOOGLE_ANALYTICS_ACCOUNT }}']);
+	_gaq.push(['_setDomainName', '{{ config.GOOGLE_ANALYTICS_DOMAIN }}']);
+	_gaq.push(['_trackPageview']);
+
+	(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+</script>
+{% endif %}
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		{% if current_user.is_anonymous() %}
+		var email = null;
+		{% else %}
+		var email = "{{current_user.email}}";
+		{% endif %}
+
+		persona_init({
+			user_id: email, /*"{{ current_user.is_anonymous() }}" === "True" ? null : "{{current_user.email}}",*/
+			login_url: "{{ url_for('persona.signin') }}",
+			logout_url: "{{ url_for('persona.signout') }}",
+			next_url: "{{ next|default(url_for('index')) }}",
+			login_button: "#signin-btn",
+			logout_button: "#signout-btn"
+		});
+	});
+</script>
+
+	{% block scripts %}
+	{% endblock %}
+	
+	<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="{{ url_for('core.static', filename='js/html5shiv.js') }}"></script>
+	  <script src="{{ url_for('core.static', filename='js/respond.min.js') }}"></script>
+	<![endif]-->
+</head>
+<body>
+	<div class="container">
+		<div class="masthead">
+			<ul class="nav nav-pills pull-right">
+				<li><a href="{{ url_for('index') }}">Home</a></li>
+				{# --- <li><a href="{{ url_for('examples') }}">Examples</a></li>
+				<li><a href="{{ url_for('new_analysis') }}">Analysis</a></li> -- #}
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Analysis <b class="caret"></b></a>
+					<ul class="dropdown-menu">
+						<li class="dropdown-header">Analyse your data</li>
+						<li><a href="{{ url_for('analysis.run', type='cohort') }}"><i class="analysis-icon analysis-icon-cohort"></i> Cohort of samples</a></li>
+						<li><a href="{{ url_for('analysis.run', type='single-tumor') }}"><i class="analysis-icon analysis-icon-single-tumor"></i> Single tumor</a></li>
+						<li class="divider"></li>
+						<li class="dropdown-header">Run an example</li>
+						<li><a href="{{ url_for('examples.run', type='cohort') }}"><i class="analysis-icon analysis-icon-cohort"></i> Cohort of samples</a></li>
+						<li><a href="{{ url_for('examples.run', type='single-tumor') }}"><i class="analysis-icon analysis-icon-single-tumor"></i> Single tumor</a></li>
+					</ul>
+				</li>
+				<li><a href="{{ url_for('cases.index') }}">Results</a></li>
+				<li><a href="{{ url_for('help') }}">Documentation</a></li>
+				<li><a href="{{ url_for('download') }}">Download</a></li>
+				{% if not g.demo %}
+					{% if current_user.is_anonymous() %}
+					<li><a id="signin-btn" href="#">Sign in</a></li>
+					{% else %}
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ current_user.name }} <b class="caret"></b></a>
+						<ul class="dropdown-menu">
+							<li><a href="#"><i class="glyphicon glyphicon-user"></i> Profile</a></li>
+							<li class="divider"></li>
+							<li><a id="signout-btn" href="#"><i class="glyphicon glyphicon-off"></i> Sign out</a></li>
+						</ul>
+					</li>
+					{% endif %}
+				{% endif %}
+			</ul>
+		</div>
+		
+		{% if not hidden_header %}
+		<div class="page-header">
+			<h2>IntOGen Mutations Analysis <small>{{ g.version }}</small><br/>
+				<small>To interpret catalogs of cancer somatic mutations</small>
+			</h2>
+		</div>
+		{% else %}
+		<div class="clearfix">
+			<h4><small>IntOGen Mutations Analysis {{ g.version }}</small></h4>
+		</div>
+		{% endif %}
+
+		{% with messages = get_flashed_messages(with_categories=true) %}
+			{% if messages %}
+				{% for category, message in messages %}
+					{% if not category or category == "message" %}
+						{% set category="info" %}
+					{% elif category and category == "error" %}
+						{% set category="danger" %}
+					{% endif %}
+					<div class="alert alert-{{ category }}">
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
+						{{ message }}
+					</div>
+				{% endfor %}
+			{% endif %}
+		{% endwith %}
+
+		{% block body %}{% endblock %}
+	</div>
+	
+	<footer class="footer">
+		<div class="container">
+			<p></p><small>The copyright of this software belongs to Universitat Pompeu Fabra and it is licensed under the UPF Free Source Code License.
+			<a href="{{ url_for('help', path='/introduction.html#license') }}">Read more ...</a></small></p>
+			{% if g.demo %}
+			<p></p><small>The IntOGen Mutations web interface may limit the maximum number of analysis that can be managed
+			at the same time and the maximum number of mutations per analysis. To avoid these limitations
+			you can <a href="{{ url_for('download') }}">download</a> and install it in your machine.</small></p>
+			{% endif %}
+		</div>
+	</footer>
+</body>
+</html>

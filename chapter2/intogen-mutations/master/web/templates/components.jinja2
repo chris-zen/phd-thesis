@@ -1,0 +1,49 @@
+{% macro render(g, current_user, case, components) -%}
+{% if components %}
+<div class="list-group">
+	<div class="list-group-item" style="height: 3.8em">
+		<div class="btn-group-sm pull-right">
+			<a id="refresh-btn" class="btn btn-default" href="#"><i class="glyphicon glyphicon-refresh"></i> Refresh</a>
+		</div>
+	</div>
+
+	{% for cmp in components %}
+	{% set details = "Created on " + cmp.created|datetimefmt %}
+	{% if cmp.started %}
+		{% set details = details + ", started on " + cmp.started|datetimefmt(cmp.created) %}
+	{% endif %}
+	{% if cmp.finished and cmp.state in ["finished", "failed", "aborted"] %}
+		{% set details = details + ", " + cmp.state + " on " + cmp.finished|datetimefmt(cmp.started) %}
+	{% endif %}
+	{% if cmp.elapsed %}
+		{% set details = details + ", elapsed " + cmp.elapsed|elapsed_time %}
+	{% endif %}
+
+	<div class="clearfix"></div>
+	<div class="list-group-item {{ active }}">
+		{% if cmp.state %}
+		<div class="progress pull-right" style="margin-left: 1em; width: 10em;">
+			{% for prg in cmp_state.progress %}
+			<div class="progress-bar progress-bar-{{ prg.state }}" style="width: {{ prg.percent }}%;" title="{{ prg.tooltip }}"></div>
+			{% endfor %}
+		</div>
+		<div class="pull-right"><span class="label state-color-{{ cmp_state.state }}">{{ cmp_state.state }}</span></div>
+		{% endif %}
+		<h4 class="list-group-item-heading"><i class="icon icon-{{ cmp_state.analysis_type }}" style="vertical-align: middle;"></i><strong> {{ cmp.name }}</strong></h4>
+		<p class="list-group-item-text" style="color: grey"><small>{{ details }}</small></p>
+		<div class="btn-group-sm">
+			<a class="btn {{ dn_disabled }}" style="padding-left: 0" href="{{ url_for('components.download', cmp_id=cmp.id) }}"><i class="glyphicon glyphicon-arrow-down"></i> Download</a>
+			{% if g.demo %}
+			<a class="btn {{ bw_disabled }}" href="/web/{{ current_user.email }}/{{ cmp.name }}" target="_top"><i class="glyphicon glyphicon-eye-open"></i> Browse</a>
+			{% endif %}
+			<a class="btn remove-btn" href="#confirm-remove" data-toggle="modal" data-cmp="{{ cmp.name }}" data-url="{{ url_for('cases.remove', cmp_id=cmp.id) }}"><i class="glyphicon glyphicon-remove"></i> Remove</a>
+		</div>
+	</div>
+	{% endfor %}
+</div>
+{% else %}
+<div class="list-group">
+	<div class="list-group-item"><strong>There are no results available.</strong></div>
+</div>
+{% endif %}
+{%- endmacro %}

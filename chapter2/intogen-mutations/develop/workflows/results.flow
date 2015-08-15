@@ -1,0 +1,31 @@
+<flow name="results">
+<title>IntOGen Mutations results</title>
+<desc>To interpret catalogs of cancer somatic mutations</desc>
+
+	<module name="scan_projects">
+		<title>Search for projects</title>
+		<desc>Search for projects</desc>
+
+		<out name="projects_out" />
+
+		<run>common/scan_projects.py</run>
+	</module>
+
+	<module name="datasets">
+		<in name="projects_in" link="scan_projects.projects_out" />
+
+		<flow>results-core</flow>
+	</module>
+
+	<module name="website" depends="datasets">
+		<in name="projects_in" link="scan_projects.projects_out" />
+
+		<flow>website-core</flow>
+	</module>
+
+	<module name="finalize" depends="qc,website">
+        <in name="projects_in" link="scan_projects.projects_out" />
+
+        <flow>finalize-core</flow>
+    </module>
+</flow>

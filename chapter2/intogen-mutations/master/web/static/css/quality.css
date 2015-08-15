@@ -1,0 +1,35 @@
+.qc-title {
+	padding-bottom: 6px;
+	margin-bottom: 14px;
+	border-bottom: solid 1px #ddd;
+}
+
+.qc-source-title {
+	padding-bottom: 6px;
+	margin-bottom: 14px;
+	/*border-bottom: solid 1px #ddd;*/
+}
+
+.qc-figure {
+	float: left;
+	padding: 12px;
+	/*margin-right: 24px;
+	margin-bottom: 12px;*/
+	text-align: left;
+}
+
+.qc-figure-header {
+}
+
+.qc-plot {
+}
+
+.qc-figure-plot-w2 {
+	width: 748px;
+	height: 340px;
+}
+
+.qc-nav {
+	margin-top: 12px;
+	margin-bottom: 24px;
+}

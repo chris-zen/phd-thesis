@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% from "components.jinja2" import render %}
+
+{% block scripts %}
+
+{% if cases %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/components.js') }}"></script>
+{% endif %}
+
+{% endblock %}
+
+{% block body %}
+
+<div id="components-list" class="clearfix" data-url="{{ url_for('.list') }}">
+	{% autoescape false %}
+	{{ render(g, current_user, components) }}
+	{% endautoescape %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,27 @@
+# Intellij IDEA files
+.idea
+*.iml
+*.ipr
+*.iws
+
+# Eclipse files
+.classpath
+.project
+.settings/
+
+# gEdit temporal files
+*~
+
+# Python bytecode
+*.pyc
+
+# Temporal folders
+runtime
+
+# distrib
+distrib/intogen-sm-*
+distrib/upload-defaults.sh
+
+data/Ensembl/*
+
+build

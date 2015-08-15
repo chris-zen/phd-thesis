@@ -1,0 +1,68 @@
+/*html, body {
+	box-sizing: border-box;
+	height: 100%;
+}
+
+.page-header {
+	height: 4.4em;
+}
+
+h2 {
+	line-height: 100%;
+}
+
+.fill {
+	box-sizing: border-box;
+}
+*/
+
+.footer {
+	padding-top: 25px;
+}
+
+[class^="analysis-icon-"],
+[class*=" analysis-icon-"] {
+	display: inline-block;
+	width: 14px;
+	height: 14px;
+	margin-top: 1px;
+	*margin-right: .3em;
+	line-height: 14px;
+	vertical-align: text-top;
+	background-image: url('/static/img/analysis_icons.png');
+	background-position: 14px 14px;
+	background-repeat: no-repeat;
+}
+
+.analysis-icon-single-tumor {
+  background-position: 0 0;
+}
+
+.analysis-icon-cohort {
+  background-position: -14px 0;
+}
+
+.progress-bar-finished, .state-color-finished {
+  background-color: #5cb85c;
+}
+
+.progress-bar-running, .state-color-running {
+  background-color: #f0ad4e;
+}
+
+.progress-bar-aborted, .state-color-aborted {
+	background-color: #991746;
+}
+
+.progress-bar-aborting, .state-color-aborting {
+	background-color: #d52162;
+}
+
+.progress-bar-failed, .state-color-failed {
+  background-color: #d9534f;
+}
+
+.progress-bar-waiting, .state-color-waiting {
+	background-color: #bac3a8;
+}
+

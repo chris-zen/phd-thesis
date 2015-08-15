@@ -1,0 +1,25 @@
+<flow name="datasets-core">
+    <title>Results</title>
+    <desc>Prepare the results datasets</desc>
+
+	<in name="projects_in" />
+
+	<module name="create">
+		<title>Create datasets</title>
+		<desc>Create datasets from the project databases</desc>
+
+		<in name="projects_in" link="projects_in" />
+		<out name="projects_out" />
+
+		<run>create.py</run>
+	</module>
+
+	<module name="zip">
+        <title>Pack results</title>
+        <desc>Create a compressed file containing the datasets</desc>
+
+		<in name="projects_in" link="projects_in" />
+
+        <run>zip.py</run>
+    </module>
+</flow>

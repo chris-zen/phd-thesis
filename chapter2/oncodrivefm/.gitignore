@@ -1,0 +1,20 @@
+# Intellij IDEA files
+.idea
+*.iml
+*.ipr
+*.iws
+
+# Eclipse files
+.classpath
+.project
+.settings/
+
+*~
+
+*.pyc
+
+build
+dist
+oncodrivefm.egg-info
+
+*.tsv

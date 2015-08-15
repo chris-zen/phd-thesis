@@ -1,0 +1,23 @@
+#!/bin/bash
+
+ENSEMBL_64="sep2011.archive.ensembl.org"
+ENSEMBL_66="feb2012.archive.ensembl.org"
+ENSEMBL_LAST="www.ensembl.org"
+
+HOST=$ENSEMBL_64
+DATA_PATH=data
+
+ensembl-get-ann $HOST $DATA_PATH/ann_prot_swissprot_id.tsv ensembl_peptide_id uniprot_swissprot
+ensembl-get-ann $HOST $DATA_PATH/ann_prot_swissprot_acc.tsv ensembl_peptide_id uniprot_swissprot_accession
+ensembl-get-ann $HOST $DATA_PATH/ann_prot_refseq_prot.tsv ensembl_peptide_id refseq_peptide
+ensembl-get-ann $HOST $DATA_PATH/ann_prot_gene.tsv ensembl_peptide_id ensembl_gene_id
+ensembl-get-ann $HOST $DATA_PATH/ann_prot_transcript.tsv ensembl_peptide_id ensembl_transcrip_id
+
+ensembl-get-ann $HOST $DATA_PATH/ann_trans_gene.tsv ensembl_transcript_id ensembl_gene_id
+ensembl-get-ann $HOST $DATA_PATH/ann_trans_sym.tsv ensembl_transcript_id hgnc_symbol
+ensembl-get-ann $HOST $DATA_PATH/ann_trans_entrez.tsv ensembl_transcript_id entrezgene
+
+ensembl-get-ann $HOST $DATA_PATH/ann_trans_mim_gene_acc.tsv ensembl_transcript_id mim_gene_accession
+ensembl-get-ann $HOST $DATA_PATH/ann_trans_mim_gene_desc.tsv ensembl_transcript_id mim_gene_description
+ensembl-get-ann $HOST $DATA_PATH/ann_trans_mim_morbid_acc.tsv ensembl_transcript_id mim_morbid_accession
+ensembl-get-ann $HOST $DATA_PATH/ann_trans_mim_morbid_desc.tsv ensembl_transcript_id mim_morbid_description

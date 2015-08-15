@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block stylesheets %}
+
+<style type="text/css">
+	html, body {
+		height: 100%;
+		overflow: hidden;
+	}
+	
+	.fill { 
+		min-height: 100%;
+		box-sizing: border-box;
+		height: 100%;
+	}
+	
+	iframe {
+		background-color: transparent;
+		width: 100%;
+		border: none;
+		/*overflow: hidden;*/
+		margin: 0;
+	}
+</style>
+
+{% endblock %}
+	
+{% block scripts %}
+	
+<script type="text/javascript">
+$(document).ready(resize_iframe);
+$(window).resize( function() {resize_iframe();} );
+
+function resize_iframe() {
+
+	var de = document.documentElement;
+	var total_height = self.innerHeight ||
+						de.clientHeight ||
+						document.body.clientHeight;
+		
+	var ifrm = document.getElementById("iframe");
+	var top_height = ifrm.offsetTop || 150;
+	
+	var ifrm_height = total_height - top_height - 120;
+	if (ifrm_height < 0) {
+		ifrm_height = 0; }
+
+	$("#iframe").height(ifrm_height);
+}
+</script>
+
+{% endblock %}
+	
+{% block body %}
+
+{% if path is none %}
+	{%set path = "/index.html" %}
+{% endif %}
+
+<iframe id="iframe" seamless src="{{ url_for('help') }}{{ path }}"></iframe>
+<!--<iframe id="iframe" seamless src="https://docs.google.com/document/d/1dzHM81IvbsFlLOGop3HnFmiy-qlN0Wppng3OphNRSg0/pub?embedded=true"></iframe>-->
+
+{% endblock %}

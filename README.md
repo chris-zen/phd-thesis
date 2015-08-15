@@ -12,7 +12,7 @@ You will find some tutorials in the [main site of the tool](http://www.gitools.o
 I started this project and was the main contributor until the version 1.5.x.
 Afterwards other members of the group continued adding new cool features and fixing bugs until now (2015) where the development still continues.
 
-This project can be directly accessed from the public repository [here](https://github.com/gitools/gitools)
+The source code can be accessed from the public repository [here](https://github.com/gitools/gitools)
 
 ## Papers
 
@@ -45,8 +45,8 @@ I was working on a benchmark for the performance of several functional impact as
 
 ## IPython Notebooks
 
-* [Condel](chapter3/condel/notebooks/condel-calc.ipynb)
 * [Creation of the predictors scores database (cluster)](chapter3/fannsdb/notebooks/fannsdb-create-offline-05.ipynb)
 * [Creation of the predictors scores database (workstation)](chapter3/fannsdb/notebooks/fannsdb-create-online-05.ipynb)
+* [Calculation of Condel scores](chapter3/condel/notebooks/condel-calc.ipynb)
 * [Generation of proxy datasets](chapter3/fannsdb/notebooks/fannsdb-datasets.ipynb)
 * [Evaluation of performance](chapter3/fannsdb/notebooks/fannsdb-perf.ipynb)

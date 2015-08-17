@@ -25,7 +25,7 @@ My main contribution to the IntOGen projects and papers is for the management of
 * [intogen-arrays](chapter2/intogen-arrays)
 * [intogen-mutations](chapter2/intogen-mutations): Last contribution for v2.4.2 [Public repository](https://bitbucket.org/intogen/mutations-analysis)
 * [oncodriveFM](chapter2/oncodrivefm): Last contribution for v0.7-dev [Public repository](https://bitbucket.org/bbglab/oncodrivefm)
-* [wok](chapter2/wok): [Public repository](https://bitbucket.org/bbglab/wok)
+* [wok](chapter2/wok): [Public repository](https://github.com/bbglab/wok)
 
 ## Papers
 

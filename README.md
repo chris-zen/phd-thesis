@@ -1,8 +1,11 @@
 This repository represents an index to the main projects I developed in the framework of my PhD thesis. I will try to keep updated links to the public repositories, and also, when necessary, a frozen copy of it at my last contribution.
 
-When finished I will include a pdf of the manuscript too.
-
 Each project has its own license, but as a general advice note that THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+# Documents
+
+* [The thesis book](ThesisBook.pdf) (I had to remove a non open access paper)
+* [The thesis defence](ThesisDefence.pdf)
 
 # Chapter 1: Gitools
 

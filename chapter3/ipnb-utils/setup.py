@@ -29,7 +29,6 @@ setup(
 
 	# metadata for upload to PyPI
 	author = "Christian Perez-Llamas",
-	author_email = "chrispz@gmail.com",
 	description = "Library with useful things for IPython Notebook",
 	license = "BSD",
 	keywords = "IPython",
